@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
   <title>CAR N O V A puzzle gallery</title>
 
   <!-- Optional Google font, you can remove if you want pure system font -->
@@ -394,6 +397,28 @@ html, body {
   height: auto;
   display: block;
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Full-width wrapper so Wix doesn’t choke it */
+#gameWrapper {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Responsive canvas */
+#puzzleCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: none;
+}
+
 
 
 </style>
