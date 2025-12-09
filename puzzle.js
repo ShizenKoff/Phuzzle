@@ -316,6 +316,7 @@ function loadCurrentPhoto() {
 
 img.onload = () => {
   imgLoaded = true;
+  bindUi();  
   initAudio();
   setupAudioUnlock();
   buildPuzzle();
@@ -325,53 +326,78 @@ img.onload = () => {
 // =========================================
 // controls
 // =========================================
+function bindButton(el, handler) {
+  if (!el || !handler) return;
 
+  // Desktop & most mobile browsers
+  el.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    handler();
+  });
 
+  // iOS / touch edge cases inside iframes (Wix)
+  el.addEventListener('touchend', (evt) => {
+    evt.preventDefault();   // stop ghost-click / scroll
+    handler();
+  }, { passive: false });
+}
 
-btnPrev.addEventListener('click', () => {
-  currentPhotoIndex =
-    (currentPhotoIndex - 1 + PHOTO_LIST.length) % PHOTO_LIST.length;
-  loadCurrentPhoto();
-});
+// -----------------------------------------
+// Bind all UI controls
+// -----------------------------------------
+function bindUi() {
+  // Photos nav
+  bindButton(btnPrev, () => {
+    currentPhotoIndex =
+      (currentPhotoIndex - 1 + PHOTO_LIST.length) % PHOTO_LIST.length;
+    loadCurrentPhoto();
+  });
 
-btnNext.addEventListener('click', () => {
-  currentPhotoIndex = (currentPhotoIndex + 1) % PHOTO_LIST.length;
-  loadCurrentPhoto();
-});
+  bindButton(btnNext, () => {
+    currentPhotoIndex = (currentPhotoIndex + 1) % PHOTO_LIST.length;
+    loadCurrentPhoto();
+  });
 
-btnRandom.addEventListener('click', () => {
-  currentPhotoIndex = Math.floor(Math.random() * PHOTO_LIST.length);
-  loadCurrentPhoto();
-});
+  bindButton(btnRandom, () => {
+    currentPhotoIndex = Math.floor(Math.random() * PHOTO_LIST.length);
+    loadCurrentPhoto();
+  });
 
-btnNew.addEventListener('click', () => {
-  if (imgLoaded) buildPuzzle();
-});
+  // New puzzle
+  bindButton(btnNew, () => {
+    if (imgLoaded) buildPuzzle();
+  });
 
-helpSlider.addEventListener('input', () => {
-  const level = Number(helpSlider.value) / 100;
-  helpValue.textContent = `${helpSlider.value}%`;
+  // Pause / resume
+  bindButton(btnPause, () => {
+    if (!imgLoaded || solvedFlag) return;
 
-  if (thumbCanvas) {
-    const blur = 6 * (1 - level);
-    const brightness = 0.5 + 0.5 * level;
-    const opacity = 0.25 + 0.75 * level;
-    thumbCanvas.style.filter = `blur(${blur}px) brightness(${brightness})`;
-    thumbCanvas.style.opacity = opacity;
+    paused = !paused;
+    btnPause.textContent = paused ? 'Resume' : 'Pause';
+
+    // when resuming, reset lastTickTime so we don't get a jump
+    if (!paused && timerActive) {
+      lastTickTime = Date.now();
+    }
+  });
+
+  // Help slider stays as an input listener (not a button)
+  if (helpSlider) {
+    helpSlider.addEventListener('input', () => {
+      const level = Number(helpSlider.value) / 100;
+      helpValue.textContent = `${helpSlider.value}%`;
+
+      if (thumbCanvas) {
+        const blur = 6 * (1 - level);
+        const brightness = 0.5 + 0.5 * level;
+        const opacity = 0.25 + 0.75 * level;
+        thumbCanvas.style.filter = `blur(${blur}px) brightness(${brightness})`;
+        thumbCanvas.style.opacity = opacity;
+      }
+    });
   }
-});
+}
 
-btnPause.addEventListener('click', () => {
-  if (!imgLoaded || solvedFlag) return;
-
-  paused = !paused;
-  btnPause.textContent = paused ? 'Resume' : 'Pause';
-
-  // when resuming, reset lastTickTime so we don't get a jump
-  if (!paused && timerActive) {
-    lastTickTime = Date.now();
-  }
-});
 
 
 
