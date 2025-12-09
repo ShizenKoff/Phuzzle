@@ -403,35 +403,37 @@ function buildPuzzle() {
   );
 
   // ===== dynamic puzzle rect from image aspect =====
+// ===== dynamic puzzle rect from image aspect =====
 const aspect = img.width / img.height; // w / h
 
-// Allow puzzle to use most of the canvas
-const maxPuzzleWidth  = canvas.width * 0.9;   // 90% of width
-const maxPuzzleHeight = canvas.height * 0.7;  // 70% of height
+const isMobile = window.innerWidth < 768;
+
+// allow puzzle to use most of the canvas
+const maxPuzzleWidth  = canvas.width  * (isMobile ? 0.95 : 0.9);
+const maxPuzzleHeight = canvas.height * (isMobile ? 0.78 : 0.7);
 
 let targetW, targetH;
 
 if (aspect >= 1) {
-  // landscape-ish image: width is the main limiter
+  // wider images
   targetW = Math.min(maxPuzzleWidth, MAX_PUZZLE_SIZE);
   targetH = targetW / aspect;
 
-  // if too tall, clamp by height instead
   if (targetH > maxPuzzleHeight) {
     targetH = maxPuzzleHeight;
     targetW = targetH * aspect;
   }
 } else {
-  // portrait image: height is the main limiter
+  // taller images
   targetH = Math.min(maxPuzzleHeight, MAX_PUZZLE_SIZE);
   targetW = targetH * aspect;
 
-  // if too wide, clamp by width instead
   if (targetW > maxPuzzleWidth) {
     targetW = maxPuzzleWidth;
     targetH = targetW / aspect;
   }
 }
+
 
 
   // ===== integer-aligned tiles to kill seams =====
