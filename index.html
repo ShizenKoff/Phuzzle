@@ -51,6 +51,23 @@
     gap: 16px;
   }
 
+  @media (max-width: 768px) {
+  body {
+    /* stop super-centering on phones; let content start near top */
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    /* much tighter padding so the board can grow */
+    padding: 8px 4px 16px;
+  }
+
+  .shell {
+    max-width: none;   /* let it use full phone width */
+    gap: 12px;
+  }
+}
+
+
   .topbar {
     display: flex;
     align-items: baseline;

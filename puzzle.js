@@ -114,7 +114,7 @@ document.addEventListener('click', e => {
 
 
 // puzzle rect (dynamic)
-const MAX_PUZZLE_SIZE = 600;
+const MAX_PUZZLE_SIZE = 1200;
 let puzzleW = 600;
 let puzzleH = 600;
 let puzzleX = (canvas.width - puzzleW) / 2;
@@ -426,7 +426,7 @@ function buildPuzzle() {
   const isMobile = window.innerWidth < 768;
 
   // small margin between puzzle and canvas edge
-  const EDGE_MARGIN = isMobile ? 8 : 16;
+  const EDGE_MARGIN = isMobile ? 0 : 12;
 
   // usable area inside the canvas
   const usableW = canvas.width  - EDGE_MARGIN * 2;
