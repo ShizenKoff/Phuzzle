@@ -422,58 +422,51 @@ function buildPuzzle() {
   if (!img) return;
 
   // ===== dynamic puzzle rect from image aspect =====
-  const maxBoardSize = Math.min(
-    canvas.width,
-    window.innerWidth * 0.82,
-    MAX_PUZZLE_SIZE
-  );
+  const aspect = img.width / img.height; // w / h
+  const isMobile = window.innerWidth < 768;
 
-  // ===== dynamic puzzle rect from image aspect =====
-// ===== dynamic puzzle rect from image aspect =====
-const aspect = img.width / img.height; // w / h
+  // small margin between puzzle and canvas edge
+  const EDGE_MARGIN = isMobile ? 8 : 16;
 
-const isMobile = window.innerWidth < 768;
+  // usable area inside the canvas
+  const usableW = canvas.width  - EDGE_MARGIN * 2;
+  const usableH = canvas.height - EDGE_MARGIN * 2;
 
-// allow puzzle to use most of the canvas
-const maxPuzzleWidth  = canvas.width  * (isMobile ? 0.95 : 0.9);
-const maxPuzzleHeight = canvas.height * (isMobile ? 0.78 : 0.7);
+  let targetW, targetH;
 
-let targetW, targetH;
-
-if (aspect >= 1) {
-  // wider images
-  targetW = Math.min(maxPuzzleWidth, MAX_PUZZLE_SIZE);
-  targetH = targetW / aspect;
-
-  if (targetH > maxPuzzleHeight) {
-    targetH = maxPuzzleHeight;
-    targetW = targetH * aspect;
-  }
-} else {
-  // taller images
-  targetH = Math.min(maxPuzzleHeight, MAX_PUZZLE_SIZE);
-  targetW = targetH * aspect;
-
-  if (targetW > maxPuzzleWidth) {
-    targetW = maxPuzzleWidth;
+  if (aspect >= 1) {
+    // wider images
+    targetW = Math.min(usableW, MAX_PUZZLE_SIZE);
     targetH = targetW / aspect;
+
+    // if too tall for usable height, clamp by height instead
+    if (targetH > usableH) {
+      targetH = usableH;
+      targetW = targetH * aspect;
+    }
+  } else {
+    // taller images
+    targetH = Math.min(usableH, MAX_PUZZLE_SIZE);
+    targetW = targetH * aspect;
+
+    // if too wide for usable width, clamp by width instead
+    if (targetW > usableW) {
+      targetW = usableW;
+      targetH = targetW / aspect;
+    }
   }
-}
 
-
-
-  // ===== integer-aligned tiles to kill seams =====
+  // snap to whole tiles
   const tileWInt = Math.floor(targetW / cols);
   const tileHInt = Math.floor(targetH / rows);
 
-  tileW = tileWInt;
-  tileH = tileHInt;
-
+  tileW   = tileWInt;
+  tileH   = tileHInt;
   puzzleW = tileW * cols;
   puzzleH = tileH * rows;
 
-  // center on whole pixels
-  puzzleX = Math.round((canvas.width - puzzleW) / 2);
+  // center puzzle in the canvas
+  puzzleX = Math.round((canvas.width  - puzzleW) / 2);
   puzzleY = Math.round((canvas.height - puzzleH) / 2);
 
   // ===== build pieces & slots =====
