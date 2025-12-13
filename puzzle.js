@@ -64,6 +64,7 @@ const ddMenu = document.getElementById('difficultyMenu');
 const ddTrigger = ddDropdown ? ddDropdown.querySelector('.dd-trigger') : null;
 const ddLabel = document.getElementById('difficultyLabel');
 
+
 let ddOpen = false;
 
 function setDifficulty(value) {
@@ -87,37 +88,33 @@ function setDifficulty(value) {
 }
 
 if (ddDropdown && ddMenu && ddTrigger && ddLabel) {
-
-  ddTrigger.addEventListener('click', (e) => {
-    e.preventDefault();
-    ddDropdown.classList.toggle('open');
+  // toggle open/close
+  ddTrigger.addEventListener('click', e => {
+    e.stopPropagation();
+    ddOpen = !ddOpen;
+    ddDropdown.classList.toggle('open', ddOpen);
   });
 
+  // select difficulty
   ddMenu.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
       const value = btn.dataset.value;
-      if (!value) return;
-
-      // update label
-      ddLabel.textContent = value.replace('x', ' × ');
-
-      // update hidden select
-      if (difficultySelect) {
-        difficultySelect.value = value;
-      }
-
-      // visual active state
-      ddMenu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
+      setDifficulty(value);
+      ddOpen = false;
       ddDropdown.classList.remove('open');
-
-      // rebuild puzzle safely
-      if (imgLoaded) buildPuzzle();
     });
   });
 
+  // close when tapping outside
+  document.addEventListener('click', e => {
+    if (!ddDropdown.contains(e.target)) {
+      ddOpen = false;
+      ddDropdown.classList.remove('open');
+    }
+  });
 }
+
 
 
 
@@ -340,23 +337,15 @@ function loadCurrentPhoto() {
 img.onload = () => {
   imgLoaded = true;
 
-  bindUiOnce();
+  resizeCanvasToCssSize();   // MUST be first
+  bindUiOnce();              // see below
   initAudio();
   setupAudioUnlock();
 
-  if (resizeCanvasToCssSize()) {
-    buildPuzzle();
-    drawThumbnail();
-  } else {
-    // try again on next frame if mobile layout hasn't settled
-    requestAnimationFrame(() => {
-      if (resizeCanvasToCssSize()) {
-        buildPuzzle();
-        drawThumbnail();
-      }
-    });
-  }
+  buildPuzzle();             // AFTER resize
+  drawThumbnail();
 };
+
 
 
 
@@ -434,6 +423,8 @@ function bindUi() {
     });
   }
 }
+
+
 
 function resizeCanvasToCssSize() {
   const rect = canvas.getBoundingClientRect();

@@ -274,22 +274,25 @@ html, body { width: 100%; overflow-x: hidden; }
       0 0 36px rgba(0, 0, 0, 1);
   }
 
-  #puzzleCanvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1; /* square puzzle */
-  max-width: 100%;
-  max-height: none;
-
-  border-radius: 18px;
-  background: #05050a;
+  #puzzleCanvas{
+  display:block;
+  width:100%;
+  aspect-ratio: 1 / 1;
+  height:auto;
+  border-radius:18px;
+  background:#05050a;
   box-shadow:
     0 0 0 2px rgba(255, 179, 230, 0.4),
     0 0 26px rgba(181, 255, 246, 0.65);
-
-  touch-action: none;
+  touch-action:none;
 }
+
+@media (max-width: 768px) {
+  .canvas-wrap{ padding: 6px; }
+  .frame{ padding: 10px; }
+  .puzzle-card{ padding: 12px 10px 10px; }
+}
+
 
   
 
