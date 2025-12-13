@@ -24,9 +24,9 @@
     --text-soft: #fff5ff;
   }
 
-  * {
-    box-sizing: border-box;
-  }
+ * { box-sizing: border-box; }
+html, body { width: 100%; overflow-x: hidden; }
+
 
   body {
     margin: 0;
@@ -50,6 +50,37 @@
     flex-direction: column;
     gap: 16px;
   }
+
+
+  @media (max-width: 768px) {
+  .shell { width: 100%; max-width: none; padding: 0 8px; }
+
+  /* your big pill buttons */
+  .btn, button, .pill-btn, .control-btn {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border-radius: 18px;
+  }
+
+  /* reduce vertical spacing between controls */
+  .controls, .controls-panel, .btn-stack {
+    gap: 10px;
+  }
+
+  /* dropdown pills */
+  select, .dd-trigger {
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border-radius: 18px;
+    max-width: 100%;
+  }
+}
+
+
+
+
 
   @media (max-width: 768px) {
   body {
@@ -235,7 +266,7 @@
   .canvas-wrap {
     margin-top: 10px;
     border-radius: 22px;
-    padding: 10px;
+    padding: 6px;
     background:
       radial-gradient(circle at top, rgba(0, 0, 0, 0.9), rgba(7, 7, 18, 0.98));
     box-shadow:
@@ -244,19 +275,22 @@
   }
 
   #puzzleCanvas {
-    display: block;
-    border-radius: 18px;
-    background: #05050a;
-    box-shadow:
-      0 0 0 2px rgba(255, 179, 230, 0.4),
-      0 0 26px rgba(181, 255, 246, 0.65);
-    touch-action: none;
-    width: 640px;
-    height: 640px;
-    max-width: 82vw;
-    max-height: 82vw;
-    margin: 0 auto;
-  }
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1; /* square puzzle */
+  max-width: 100%;
+  max-height: none;
+
+  border-radius: 18px;
+  background: #05050a;
+  box-shadow:
+    0 0 0 2px rgba(255, 179, 230, 0.4),
+    0 0 26px rgba(181, 255, 246, 0.65);
+
+  touch-action: none;
+}
+
   
 
   .credit {
@@ -408,13 +442,6 @@ html, body {
 }
 
 
-/* Make the canvas shrink to fit phones */
-#puzzleCanvas {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
 html, body {
   margin: 0;
   padding: 0;
@@ -428,19 +455,36 @@ html, body {
   padding: 0;
 }
 
-/* Responsive canvas */
-#puzzleCanvas {
-  width: 100%;
-  height: auto;
-  display: block;
-  touch-action: none;
+@media (max-width: 768px) {
+  .frame {
+    padding: 10px;
+  }
+
+  .puzzle-card {
+    padding: 10px 8px;
+  }
+
+  #controls {
+    gap: 6px;
+  }
+
+  #controls button,
+  #controls .dd-trigger {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
 }
 
-#puzzleCanvas {
-  width: 100%;
-  height: auto;
-  display: block;
-  touch-action: none; /* stops the browser from treating drags as scroll */
+@media (max-width: 768px) {
+  #hud {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hud-pill {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 
@@ -495,19 +539,7 @@ html, body {
       <!-- Background music -->
 <audio id="puzzleBgm" src="assets/audio/puzzleBGm.mp3" loop preload="auto"></audio>
 
-      <!-- Custom Difficulty Dropdown -->
-      <div class="difficulty-dropdown" id="difficultyDropdown">
-        <button class="dd-trigger" type="button">
-          <span class="dd-label" id="difficultyLabel">4 × 4</span>
-          <span class="dd-caret">▾</span>
-        </button>
-
-        <div class="dd-menu" id="difficultyMenu">
-          <button type="button" data-value="3x3">3 × 3</button>
-          <button type="button" data-value="4x4" class="active">4 × 4</button>
-          <button type="button" data-value="6x6">6 × 6</button>
-        </div>
-      </div>
+    
 
       <!-- hidden original select -->
       <select id="difficulty" hidden>

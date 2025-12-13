@@ -61,7 +61,7 @@ const thumbCtx = thumbCanvas ? thumbCanvas.getContext('2d') : null;
 
 const ddDropdown = document.getElementById('difficultyDropdown');
 const ddMenu = document.getElementById('difficultyMenu');
-const ddTrigger = ddDropdown.querySelector('.dd-trigger');
+const ddTrigger = ddDropdown ? ddDropdown.querySelector('.dd-trigger') : null;
 const ddLabel = document.getElementById('difficultyLabel');
 
 let ddOpen = false;
@@ -86,31 +86,39 @@ function setDifficulty(value) {
   });
 }
 
-// toggle open/close
-ddTrigger.addEventListener('click', e => {
-  e.stopPropagation();
-  ddOpen = !ddOpen;
-  ddDropdown.classList.toggle('open', ddOpen);
-});
+if (ddDropdown && ddMenu && ddTrigger && ddLabel) {
 
-// select difficulty from menu
-ddMenu.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    const value = btn.dataset.value;
-    setDifficulty(value);
-    ddOpen = false;
-    ddDropdown.classList.remove('open');
+  ddTrigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    ddDropdown.classList.toggle('open');
   });
-});
 
-// close when tapping outside
-document.addEventListener('click', e => {
-  if (!ddDropdown.contains(e.target)) {
-    ddOpen = false;
-    ddDropdown.classList.remove('open');
-  }
-});
+  ddMenu.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const value = btn.dataset.value;
+      if (!value) return;
+
+      // update label
+      ddLabel.textContent = value.replace('x', ' × ');
+
+      // update hidden select
+      if (difficultySelect) {
+        difficultySelect.value = value;
+      }
+
+      // visual active state
+      ddMenu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      ddDropdown.classList.remove('open');
+
+      // rebuild puzzle safely
+      if (imgLoaded) buildPuzzle();
+    });
+  });
+
+}
+
 
 
 // puzzle rect (dynamic)
@@ -170,6 +178,10 @@ let audioEnabled = true;          // default on
 let audioUnlocked = false;        // flips true once browser lets us play
 let bgmAudio = null;
 let btnMuteAudio = null;
+
+let canvasCssW = 0;
+let canvasCssH = 0;
+
 
 const AUDIO_STORAGE_KEY = 'photoPuzzle_audioEnabled';
 
@@ -303,6 +315,17 @@ function updateBestIfNeeded(finalTime, finalMoves) {
   }
 }
 
+
+let uiBound = false;
+
+function bindUiOnce() {
+  if (uiBound) return;
+  uiBound = true;
+  bindUi();
+}
+
+
+
 // =========================================
 // image loading
 // =========================================
@@ -316,12 +339,16 @@ function loadCurrentPhoto() {
 
 img.onload = () => {
   imgLoaded = true;
-  bindUi();  
+
+  bindUiOnce();          // see #2 below
   initAudio();
   setupAudioUnlock();
+
+  resizeCanvasToCssSize();
   buildPuzzle();
   drawThumbnail();
 };
+
 
 // =========================================
 // controls
@@ -398,6 +425,24 @@ function bindUi() {
   }
 }
 
+function resizeCanvasToCssSize() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+
+  canvasCssW = rect.width;
+  canvasCssH = rect.height;
+
+  const w = Math.round(rect.width * dpr);
+  const h = Math.round(rect.height * dpr);
+
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
 
 
 
@@ -429,8 +474,8 @@ function buildPuzzle() {
   const EDGE_MARGIN = isMobile ? 0 : 12;
 
   // usable area inside the canvas
-  const usableW = canvas.width  - EDGE_MARGIN * 2;
-  const usableH = canvas.height - EDGE_MARGIN * 2;
+  const usableW = canvasCssW.width  - EDGE_MARGIN * 2;
+  const usableH = canvasCssW.height - EDGE_MARGIN * 2;
 
   let targetW, targetH;
 
@@ -466,8 +511,8 @@ function buildPuzzle() {
   puzzleH = tileH * rows;
 
   // center puzzle in the canvas
-  puzzleX = Math.round((canvas.width  - puzzleW) / 2);
-  puzzleY = Math.round((canvas.height - puzzleH) / 2);
+  puzzleX = Math.round((canvasCssW.width  - puzzleW) / 2);
+  puzzleY = Math.round((canvasCssW.height - puzzleH) / 2);
 
   // ===== build pieces & slots =====
   let id = 0;
@@ -622,7 +667,7 @@ function draw() {
   }
 
   // clear whole canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvasCssW.width, canvasCssW.height);
 
   // base neon border
   drawPuzzleBorderBase();
@@ -632,7 +677,7 @@ function draw() {
     ctx.fillStyle = '#d8c0ff';
     ctx.textAlign = 'center';
     ctx.font = '20px system-ui';
-    ctx.fillText('Loading photo', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Loading photo', canvasCssW.width / 2, canvasCssW.height / 2);
     requestAnimationFrame(draw);
     return;
   }
@@ -1038,14 +1083,12 @@ function drawVictoryOverlay() {
 
 function getPointerPos(evt) {
   const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-
   return {
-    x: (evt.clientX - rect.left) * scaleX,
-    y: (evt.clientY - rect.top) * scaleY
+    x: (evt.clientX - rect.left),
+    y: (evt.clientY - rect.top)
   };
 }
+
 
 function startDrag(evt) {
   if (!imgLoaded) return;
