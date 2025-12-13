@@ -340,14 +340,24 @@ function loadCurrentPhoto() {
 img.onload = () => {
   imgLoaded = true;
 
-  bindUiOnce();          // see #2 below
+  bindUiOnce();
   initAudio();
   setupAudioUnlock();
 
-  resizeCanvasToCssSize();
-  buildPuzzle();
-  drawThumbnail();
+  if (resizeCanvasToCssSize()) {
+    buildPuzzle();
+    drawThumbnail();
+  } else {
+    // try again on next frame if mobile layout hasn't settled
+    requestAnimationFrame(() => {
+      if (resizeCanvasToCssSize()) {
+        buildPuzzle();
+        drawThumbnail();
+      }
+    });
+  }
 };
+
 
 
 // =========================================
@@ -427,21 +437,23 @@ function bindUi() {
 
 function resizeCanvasToCssSize() {
   const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
 
-  canvasCssW = rect.width;
-  canvasCssH = rect.height;
+  // Guard: if Wix/phone hasn't laid it out yet
+  if (!rect.width || !rect.height) return false;
 
-  const w = Math.round(rect.width * dpr);
-  const h = Math.round(rect.height * dpr);
+  const w = Math.round(rect.width);
+  const h = Math.round(rect.height);
 
   if (canvas.width !== w || canvas.height !== h) {
     canvas.width = w;
     canvas.height = h;
   }
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Use 1:1 coords so buildPuzzle math matches draw coords
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  return true;
 }
+
 
 
 

@@ -487,6 +487,22 @@ html, body {
   }
 }
 
+@media (max-width: 768px) {
+  #puzzleCanvas{
+    width: 100%;
+    height: min(68vh, 96vw);
+    max-width: 100%;
+  }
+}
+
+html, body { overflow-x: hidden; }
+.shell { width: 100%; max-width: none; padding: 0 8px; overflow-x: hidden; }
+
+@media (max-width: 768px) {
+  .frame { padding: 10px; }
+  .puzzle-card { padding: 10px 8px; }
+}
+
 
 
 </style>
